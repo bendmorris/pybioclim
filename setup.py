@@ -38,5 +38,7 @@ setup(name='pybioclim',
                    },
       package_data = {
                       'pybioclim': ['data/*.bil', 'data/*.hdr', 'data/*.pkl'],
-                      }
+                      },
+      install_requires=['numpy', 'gdal'],
+      extras_require={'draw_map':['matplotlib', 'mpl_toolkits.basemap']},
       )
