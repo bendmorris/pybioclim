@@ -2,10 +2,11 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import numpy as np
 from config import ul, lr
+from read_headers import variable_names
 from get_data import get_dataset
 
 
-def draw_map(file, map=None, show=True):
+def draw_map(file, map=None, show=True, title=None):
     '''Use Matplotlib's basemap to generate a map of a given BIOCLIM data 
     file.
 
@@ -21,7 +22,8 @@ def draw_map(file, map=None, show=True):
     values = np.ma.masked_where(values==-9999, values)
 
     plt.figure()
-    plt.title(file)
+    if title is None: title = '%s: %s' % (file, variable_names[file])
+    plt.title(title)
     if map is None: map = Basemap(projection='mill',lon_0=0)
     map.drawcoastlines(linewidth=1)
     map.drawcountries(linewidth=1)
