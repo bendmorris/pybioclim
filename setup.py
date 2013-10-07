@@ -14,11 +14,11 @@ def locate(pattern, root=os.curdir):
         for filename in fnmatch.filter(files, pattern):
             yield os.path.join(path, filename)
 
+# run doctest unit tests in all source Python scripts
 failures = 0
-scripts = locate('*.py')
+scripts = locate('*.py', root='src')
 for script in scripts:
     script = (os.path.relpath(script)[:-len('.py')]).replace('/', '.')
-    if script.startswith('build.'): continue
     print '**', script, '**'
     mod = importlib.import_module(script)
     result = doctest.testmod(mod, verbose=True)

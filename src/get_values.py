@@ -19,7 +19,12 @@ def get_dataset(file):
 def get_values(file, points, ul_x=None, ul_y=None, lr_x=None, lr_y=None):
     '''Given a .bil file (or other file readable by GDAL) and a set of (lat,lon) 
     points, return a list of values for those points. -9999 will be converted to 
-    None.'''
+    None.
+    
+    >>> lat_lons = [(10,10), (20,20)]
+    >>> get_values('bio1', lat_lons)
+    [254, 252]
+    '''
 
     data = get_dataset(file)
     raster = data.ReadAsArray()
