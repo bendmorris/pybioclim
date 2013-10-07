@@ -42,14 +42,3 @@ def get_values(file, points, ul_x=ul[1], ul_y=ul[0], lr_x=lr[1], lr_y=lr[0]):
         if value == -9999: value = None
         result.append(value)
     return result
-
-
-if __name__ == '__main__':
-    import sys
-    file = sys.argv[1]
-    n = 2
-    points = []
-    while len(sys.argv) > n:
-        points.append((float(sys.argv[n]), float(sys.argv[n+1])))
-        n += 2
-    print get_values(file, points)

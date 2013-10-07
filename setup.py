@@ -41,4 +41,9 @@ setup(name='pybioclim',
                       },
       install_requires=['numpy', 'gdal'],
       extras_require={'draw_map':['matplotlib', 'mpl_toolkits.basemap']},
+      entry_points={
+        'console_scripts': [
+            'pybioclim = pybioclim.__main__:main',
+        ],
+      },
       )
