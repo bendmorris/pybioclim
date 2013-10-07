@@ -8,8 +8,10 @@ To install:
 To use:
 
     import pybioclim
+    
     # get the GDAL Dataset object
     data = pybioclim.get_dataset('bio1')
+    array = data.ReadAsArray()
     
     # get a list of values at specified lat/lon coordinates
     lat_lon = [(0,0),
