@@ -1,16 +1,17 @@
 import os
 import cPickle as pkl
+from config import DATA_DIR
 
 
-pkl_path = 'data/headers.pkl'
+pkl_path = os.path.join(DATA_DIR, 'headers.pkl')
 
 def dump_headers():
-    headers = [filename for filename in os.listdir('data')
+    headers = [filename for filename in os.listdir(DATA_DIR)
                         if filename.endswith('.hdr')]
 
     variable_names = {}
     for header in headers:
-        with open(os.path.join('data', header)) as header_file:
+        with open(os.path.join(DATA_DIR, header)) as header_file:
             for line in header_file:
                 line = line.strip().lower()
                 if not line: continue

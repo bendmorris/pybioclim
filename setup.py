@@ -1,9 +1,10 @@
 from setuptools import setup
-from __init__ import __version__
+from src.config import __version__
 import doctest
 import os
 import fnmatch
 import importlib
+import src.read_headers
 
 
 def locate(pattern, root=os.curdir):
@@ -16,9 +17,9 @@ def locate(pattern, root=os.curdir):
 failures = 0
 scripts = locate('*.py')
 for script in scripts:
-    print '**', script, '**'
     script = (os.path.relpath(script)[:-len('.py')]).replace('/', '.')
-    print script
+    if script.startswith('build.'): continue
+    print '**', script, '**'
     mod = importlib.import_module(script)
     result = doctest.testmod(mod, verbose=True)
     failures += result.failed
@@ -33,6 +34,9 @@ setup(name='pybioclim',
       url='https://github.com/bendmorris/pybioclim',
       packages=['pybioclim'],
       package_dir={
-                'pybioclim':''
-                },
+                   'pybioclim':'src'
+                   },
+      package_data = {
+                      'pybioclim': ['data/*.bil', 'data/*.hdr', 'data/*.pkl'],
+                      }
       )

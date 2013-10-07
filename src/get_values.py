@@ -1,14 +1,27 @@
+import os
 import gdal
 from read_headers import variable_names
 from coords_to_raster_xy import xy_coords
+from config import DATA_DIR
 
+
+def get_dataset(file):
+    '''Returns an open GDAL dataset object for the given BIOCLIM data file.
+    
+    >>> data = get_dataset('bio1')
+    >>> import os
+    >>> os.path.basename(data.GetDescription())
+    'bio1.bil'
+    '''
+    if not '.' in file: file += '.bil'
+    return gdal.Open(os.path.join(DATA_DIR, file))
 
 def get_values(file, points, ul_x=None, ul_y=None, lr_x=None, lr_y=None):
     '''Given a .bil file (or other file readable by GDAL) and a set of (lat,lon) 
     points, return a list of values for those points. -9999 will be converted to 
     None.'''
 
-    data = gdal.Open(file)
+    data = get_dataset(file)
     raster = data.ReadAsArray()
     if ul_x is None: ul_x = -180
     if ul_y is None: ul_y = 90
