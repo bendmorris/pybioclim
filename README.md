@@ -16,3 +16,6 @@ To use:
                (-20,-170),
                (50, 12.2527)]
     values = pybioclim.get_values('bio1', lat_lon)
+    
+    # draw a map of a BIOCLIM variable
+    pybioclim.draw_map('bio1')

@@ -2,7 +2,7 @@ import os
 import gdal
 from read_headers import variable_names
 from coords_to_raster_xy import xy_coords
-from config import DATA_DIR
+from config import DATA_DIR, ul, lr
 
 
 def get_dataset(file):
@@ -16,7 +16,10 @@ def get_dataset(file):
     if not '.' in file: file += '.bil'
     return gdal.Open(os.path.join(DATA_DIR, file))
 
-def get_values(file, points, ul_x=None, ul_y=None, lr_x=None, lr_y=None):
+def dim(width, size):
+    return float(width)/size
+
+def get_values(file, points, ul_x=ul[1], ul_y=ul[0], lr_x=lr[1], lr_y=lr[0]):
     '''Given a .bil file (or other file readable by GDAL) and a set of (lat,lon) 
     points, return a list of values for those points. -9999 will be converted to 
     None.
@@ -28,13 +31,9 @@ def get_values(file, points, ul_x=None, ul_y=None, lr_x=None, lr_y=None):
 
     data = get_dataset(file)
     raster = data.ReadAsArray()
-    if ul_x is None: ul_x = -180
-    if ul_y is None: ul_y = 90
-    if lr_x is None: lr_x = 180
-    if lr_y is None: lr_y = -60
     
-    xdim = (float(lr_x-ul_x)/data.RasterXSize)
-    ydim = (float(ul_y-lr_y)/data.RasterYSize)
+    xdim = dim(lr_x-ul_x, data.RasterXSize)
+    ydim = dim(ul_y-lr_y, data.RasterYSize)
 
     result = []
     for lat, lon in points:
