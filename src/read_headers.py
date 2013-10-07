@@ -18,7 +18,8 @@ def dump_headers():
 
                 key, value = line.split()[0], ' '.join(line.split()[1:])
                 if key == 'variable':
-                    variable_names[header] = value
+                    value = value.split(' = ')[1]
+                    variable_names[header[:-len('.hdr')]] = value
 
 
     with open(pkl_path, 'w') as dump_file:
