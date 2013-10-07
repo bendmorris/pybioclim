@@ -6,6 +6,10 @@ from config import DATA_DIR
 pkl_path = os.path.join(DATA_DIR, 'headers.pkl')
 
 def dump_headers():
+    ''' 
+    >>> variable_names['bio1']
+    'annual mean temperature'
+    '''
     headers = [filename for filename in os.listdir(DATA_DIR)
                         if filename.endswith('.hdr')]
 
@@ -26,9 +30,6 @@ def dump_headers():
         pkl.dump(variable_names, dump_file, -1)
 
 
-if __name__ == '__main__':
-    dump_headers()
-else:
-    if not os.path.exists(pkl_path): dump_headers()
-    with open(pkl_path) as pkl_file:
-        variable_names = pkl.load(pkl_file)
+if not os.path.exists(pkl_path): dump_headers()
+with open(pkl_path) as pkl_file:
+    variable_names = pkl.load(pkl_file)
