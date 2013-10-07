@@ -24,9 +24,9 @@ def get_values(file, points, ul_x=ul[1], ul_y=ul[0], lr_x=lr[1], lr_y=lr[0]):
     points, return a list of values for those points. -9999 will be converted to 
     None.
     
-    >>> lat_lons = [(10,10), (20,20)]
+    >>> lat_lons = [(10,10), (20,20), (0,0)]
     >>> get_values('bio1', lat_lons)
-    [254, 252]
+    [254, 252, None]
     '''
 
     data = get_dataset(file)
