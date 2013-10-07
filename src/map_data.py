@@ -41,7 +41,7 @@ def draw_map(file, map=None, show=True, title=None, log=False):
     x, y = np.meshgrid(lons, lats)
     data = np.zeros(x.shape)
             
-    map.pcolormesh(x, y, data=values, latlon=True, cmap=plt.cm.OrRd)
+    map.pcolormesh(x, y, data=values, latlon=True, cmap=plt.cm.Spectral_r)
     cbar = plt.colorbar()
     
     if show: plt.show()
