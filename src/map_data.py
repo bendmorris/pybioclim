@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from config import ul, lr
 from read_headers import variable_names
-from get_data import get_dataset
+from get_data import get_dataset, extract_attributes
 
 
 def draw_map(file, map=None, show=True, title=None, log=False):
@@ -14,14 +14,15 @@ def draw_map(file, map=None, show=True, title=None, log=False):
     keyword argument "map." If none is provided, the default Miller 
     projection will be used.'''
     
+    data, raster, no_value, ul, dims, size = extract_attributes(file)
     data = get_dataset(file)
-    lats = np.linspace(ul[0], lr[0], data.RasterYSize, endpoint=False)
-    lons = np.linspace(ul[1], lr[1], data.RasterXSize, endpoint=False)
+    lats = np.linspace(ul[0], ul[0]-dims[0]*size[0], size[0], endpoint=False)
+    lons = np.linspace(ul[1], ul[1]+dims[1]*size[1], size[1], endpoint=False)
     
     # because missing data is entered as -9999, created a masked array so that 
     # these points will not be plotted
     values = data.ReadAsArray()
-    values = np.ma.masked_where(values==-9999, values)
+    values = np.ma.masked_where(values==no_value, values)
     
     # log transform data, if requested
     if log:
