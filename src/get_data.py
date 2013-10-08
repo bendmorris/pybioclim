@@ -1,6 +1,7 @@
 import os
 import math
 import gdal
+import numpy as np
 from read_headers import variable_names
 from coords_to_raster_xy import xy_coords
 from config import DATA_DIR, ul, lr
@@ -83,6 +84,99 @@ def distance(p1, p2):
 
 def points_within_distance(start_point, radius, ul, dims):
     '''Find the set of lat/lon coords in a raster that are within `radius` km of 
-    the starting point.'''
-    pass
+    the starting point.
     
+    >>> points_within_distance((0,0), 0, (90, -180), (0.5, 0.5))
+    [(0, 0)]
+    >>> points_within_distance((0,0), 100, (90, -180), (0.5, 0.5))
+    [(-0.5, -0.5), (-0.5, 0.0), (-0.5, 0.5), (0.0, -0.5), (0, 0), (0.0, 0.5), (0.5, -0.5), (0.5, 0.0), (0.5, 0.5)]
+    '''
+    
+    box_size = 1
+    points = set([start_point])
+    last_point_size = 1
+    while True:
+        b, a = [np.linspace(start_point[i]-dims[i]*box_size, 
+                            start_point[i]+dims[i]*box_size, 
+                            1+box_size*2)
+                for i in (0,1)]
+        for bi in b:
+            for ai in a:
+                dist = distance((bi,ai),start_point)
+                if dist <= radius: points.add((bi,ai))
+                
+        if not len(points) > last_point_size: break
+        last_point_size = len(points)
+        box_size += 1
+
+    return sorted(list(points))
+
+
+def get_average(file, points, radius=40, ul=ul, lr=lr):
+    '''Like get_values, but computes the average value within a circle of the 
+    specified radius (in km).
+    
+    Missing values are ignored. Returns None if there were no values within the 
+    circle.
+    
+    >>> lat_lons = [(10,10), (20,20), (0,0)]
+    >>> get_average('bio1', lat_lons, 0)
+    [254.0, 252.0, None]
+    >>> get_average('bio1', lat_lons, 100) != get_average('bio1', lat_lons, 50) != get_average('bio1', lat_lons, 0)
+    True
+    '''
+
+    data = get_dataset(file)
+    raster = data.ReadAsArray()
+    
+    size = data.RasterYSize, data.RasterXSize
+    xdim = dim(lr[1]-ul[1], size[1])
+    ydim = dim(ul[0]-lr[0], size[0])
+    dims = (ydim, xdim)
+    
+    result = []
+    for point in points:
+        within = points_within_distance(point, radius, ul, dims)
+        raster_positions = [xy_coords((lat, lon), ul, dims, size) for (lat, lon) in within]
+        values = [raster[pos] for pos in raster_positions if raster[pos] != -9999]
+        if len(values) == 0: result.append(None)
+        else:
+            result.append(sum(values)/float(len(values)))
+
+    return result
+
+
+def get_spatial_variance(file, points, radius=40, ul=ul, lr=lr):
+    '''Like get_values, but computes the spatial variance within a circle of the
+    specified radius (in km).
+    
+    Missing values are ignored. Returns None if there were no values within the 
+    circle.
+    
+    >>> lat_lons = [(10,10), (20,20), (0,0)]
+    >>> get_spatial_variance('bio1', lat_lons, 0)
+    [0.0, 0.0, None]
+    >>> (get_spatial_variance('bio1', lat_lons, 100) >= 
+    ... get_spatial_variance('bio1', lat_lons, 50) >= 
+    ... get_spatial_variance('bio1', lat_lons, 0))
+    True
+    '''
+
+    data = get_dataset(file)
+    raster = data.ReadAsArray()
+    
+    size = data.RasterYSize, data.RasterXSize
+    xdim = dim(lr[1]-ul[1], size[1])
+    ydim = dim(ul[0]-lr[0], size[0])
+    dims = (ydim, xdim)
+    
+    result = []
+    for point in points:
+        within = points_within_distance(point, radius, ul, dims)
+        raster_positions = [xy_coords((lat, lon), ul, dims, size) for (lat, lon) in within]
+        values = [raster[pos] for pos in raster_positions if raster[pos] != -9999]
+        if len(values) == 0: result.append(None)
+        else:
+            result.append(np.var(values))
+
+    return result
