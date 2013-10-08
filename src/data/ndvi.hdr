@@ -12,3 +12,4 @@ ULYMAP         89.95
 XDIM           0.1
 YDIM           0.1
 NODATA         1
+Variable      NDVI = Normalized Difference Vegetation Index
