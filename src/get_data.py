@@ -36,13 +36,11 @@ def get_values(file, points, ul_x=ul[1], ul_y=ul[0], lr_x=lr[1], lr_y=lr[0]):
     data = get_dataset(file)
     raster = data.ReadAsArray()
     
-    xdim = dim(lr_x-ul_x, data.RasterXSize)
-    ydim = dim(ul_y-lr_y, data.RasterYSize)
+    xsize, ysize = data.RasterXSize, data.RasterYSize
+    xdim = dim(lr_x-ul_x, xsize)
+    ydim = dim(ul_y-lr_y, ysize)
 
-    result = []
-    for lat, lon in points:
-        y, x = xy_coords(lat, lon, ul_x, ul_y, xdim, ydim)
-        value = raster[y,x]
-        if value == -9999: value = None
-        result.append(value)
+    result = [raster[xy_coords(lat, lon, ul_x, ul_y, xdim, ydim, xsize, ysize)] for (lat, lon) in points]
+    result = [None if value == -9999 else value for value in result]
+
     return result
