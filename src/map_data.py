@@ -30,7 +30,8 @@ def draw_map(file, map=None, show=True, title=None, log=False):
         values = np.log1p(values)
     
     plt.figure()
-    if title is None: title = '%s: %s' % (file, variable_names[file])
+    if title is None:
+        title = '%s: %s' % (file, variable_names[file] if file in variable_names else file)
     plt.title(title)
     if map is None:
         map = Basemap(projection='mill',lon_0=0)
