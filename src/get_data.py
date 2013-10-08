@@ -5,6 +5,8 @@ from coords_to_raster_xy import xy_coords
 from config import DATA_DIR, ul, lr
 
 
+loaded_datasets = {}
+
 def get_dataset(file):
     '''Returns an open GDAL dataset object for the given BIOCLIM data file.
     
@@ -14,7 +16,9 @@ def get_dataset(file):
     'bio1.bil'
     '''
     if not '.' in file: file += '.bil'
-    return gdal.Open(os.path.join(DATA_DIR, file))
+    if not file in loaded_datasets:
+        loaded_datasets[file] = gdal.Open(os.path.join(DATA_DIR, file))
+    return loaded_datasets[file]
 
 def dim(width, size):
     return float(width)/size
