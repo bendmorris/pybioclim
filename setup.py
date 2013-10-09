@@ -46,7 +46,6 @@ sys.argv = [sys.argv[0], 'build_ext', '--inplace']
 do_setup()
 
 from src.config import __version__
-import src.read_headers
 
 
 def locate(pattern, root=os.curdir):

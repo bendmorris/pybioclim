@@ -1,9 +1,8 @@
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import numpy as np
-from config import ul, lr
-from read_headers import variable_names
-from get_data import get_dataset, extract_attributes, get_spatial_variance
+from read_data import variable_names, get_dataset, extract_attributes
+from get_values import get_spatial_variance
 
 
 def draw_map(file, map=None, show=True, title=None, log=False, map_type=None):

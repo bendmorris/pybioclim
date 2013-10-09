@@ -14,7 +14,3 @@ def find_data(name):
         path = os.path.join(data_dir, name)
         if os.path.exists(path):
             return path
-
-# upper left and lower right corners of a BIOCLIM raster file (lat,lon)
-ul = (90, -180)
-lr = (-60, 180)

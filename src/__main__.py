@@ -1,4 +1,4 @@
-from get_data import get_values
+from get_values import get_values
 from map_data import draw_map
 
 def main():

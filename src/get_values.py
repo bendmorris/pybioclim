@@ -2,53 +2,9 @@ import os
 import math
 import gdal
 import numpy as np
-from read_headers import variable_names, metadata, read_header
+from read_data import variable_names, metadata, read_header, get_dataset, extract_attributes
 from coords import xy_coords, distance, points_within_distance
-from config import DATA_PATHS, ul, lr, find_data
-
-
-loaded_datasets = {}
-
-def get_dataset(file):
-    '''Returns an open GDAL dataset object for the given BIOCLIM data file.
-    
-    >>> data = get_dataset('bio1')
-    >>> import os
-    >>> os.path.basename(data.GetDescription())
-    'bio1.bil'
-    >>> data2 = get_dataset('src/data/bio1.bil')
-    >>> os.path.basename(data.GetDescription()) == os.path.basename(data2.GetDescription())
-    True
-    '''
-    if not file.endswith('.bil'): file += '.bil'
-    if not file in loaded_datasets:
-        # check the current working directory as well sa the package data path
-        path = find_data(file)
-        if path is None:
-            raise Exception("Couldn't find %s in working directory or package data." % file)
-        loaded_datasets[file] = gdal.Open(path)
-            
-    if not file in metadata:
-        read_header(file[:-len('.bil')])
-    
-    return loaded_datasets[file]
-
-
-def extract_attributes(file):
-    '''Get information about a .bil file.'''
-    data = get_dataset(file)
-    raster = data.ReadAsArray()
-    try:
-        no_value = metadata[file]['nodata']
-    except KeyError:
-        no_value = -9999
-    
-    ul = (float(metadata[file]['ulymap']), float(metadata[file]['ulxmap']))
-    dims = (float(metadata[file]['ydim']), float(metadata[file]['xdim']))
-    
-    size = data.RasterYSize, data.RasterXSize
-
-    return data, raster, no_value, ul, dims, size
+from config import DATA_PATHS, find_data
 
 
 def get_values(file, points):
