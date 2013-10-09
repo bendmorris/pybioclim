@@ -90,7 +90,6 @@ cpdef points_within_distance(double sy, double sx, double uly, double ulx, doubl
     lon_width = distance(sy, sx-dimx/2, sy, sx+dimx/2)
     box_y = int(radius/lat_width+1)
     box_x = int(radius/lon_width+1)
-    points = []
 
     b = np.linspace(sy-dimy*box_y, 
                     sy+dimy*box_y, 
@@ -98,9 +97,6 @@ cpdef points_within_distance(double sy, double sx, double uly, double ulx, doubl
     a = np.linspace(sx-dimx*box_x, 
                     sx+dimx*box_x, 
                     1+box_x*2)
-    for bi in b:
-        for ai in a:
-            dist = distance(sy,sx,bi,ai)
-            if dist <= radius: points.append((bi,ai))
-                
-    return points
+
+    return [(bi,ai) for bi in b for ai in a
+            if distance(sy,sx,bi,ai) <= radius]

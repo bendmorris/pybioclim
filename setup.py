@@ -60,10 +60,12 @@ failures = 0
 scripts = [x for x in locate('*.py', root='src')] + [x for x in locate('*.so', root='src')]
 for script in scripts:
     script = (os.path.relpath(script)[:-len('.py')]).replace('/', '.')
-    print '**', script, '**'
+    print '** testing', script, '**'
     mod = importlib.import_module(script)
     result = doctest.testmod(mod)
     failures += result.failed
+
+doctest.testfile('README.md')
 
 if failures > 0: raise Exception('%s tests failed.' % failures)
 
