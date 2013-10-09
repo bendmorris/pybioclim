@@ -1,7 +1,5 @@
-import doctest
 import numpy as np
-import math
-
+cimport cython
 
 cdef extern from "math.h":
     double sin(double)
@@ -10,7 +8,8 @@ cdef extern from "math.h":
 
 cdef double pi = 3.141592654
 
-cpdef xy_coords(py, px, uly, ulx, dimy, dimx):
+@cython.cdivision(True)
+cpdef xy_coords(double py, double px, double uly, double ulx, double dimy, double dimx):
     '''Given a latitude/longitude pair and resolution information about the 
     raster file, gives the row/column of the corresponding raster matrix.
 
@@ -36,9 +35,11 @@ cpdef xy_coords(py, px, uly, ulx, dimy, dimx):
 
     return dy, dx
 
-cpdef double radians(double deg):
+@cython.cdivision(True)
+cdef double radians(double deg):
     '''Converts degrees to radians.
 
+    >>> import math
     >>> abs(radians(0)) < 0.00001
     True
     >>> abs(radians(90) - math.pi/2) < 0.00001
@@ -52,7 +53,8 @@ cpdef double radians(double deg):
     '''
     return deg/180.*(pi)
 
-cpdef double distance(double y1, double x1, double y2, double x2):
+@cython.cdivision(True)
+cdef double distance(double y1, double x1, double y2, double x2):
     '''Approximate distance between two lat/lon points, in km.
     
     p1 and p2 should be tuples containing (lat,lon)
@@ -64,13 +66,15 @@ cpdef double distance(double y1, double x1, double y2, double x2):
     >>> 110 <= distance(0,0, 1,0) <= 112
     True
     '''
+    cdef double dy, dx, a, c
     dy = radians(abs(y2-y1))
     dx = radians(abs(x2-x1))
     a = sin(dy/2)**2 + sin(dx/2)**2 * cos(radians(y1)) * cos(radians(y2))
-    c = 2 * atan2(a**0.5, (1-a)**0.5)
-    return 6371 * c
+    c = 6371 * 2 * atan2(a**0.5, (1-a)**0.5)
+    return c
 
-cpdef points_within_distance(sy, sx, uly, ulx, dimy, dimx, double radius=40):
+@cython.cdivision(True)
+cpdef points_within_distance(double sy, double sx, double uly, double ulx, double dimy, double dimx, double radius=40):
     '''Find the set of lat/lon coords in a raster that are within `radius` km of 
     the starting point.
     
@@ -84,8 +88,8 @@ cpdef points_within_distance(sy, sx, uly, ulx, dimy, dimx, double radius=40):
     cdef int box_y, box_x
     lat_width = distance(sy-dimy/2, sx, sy+dimy/2, sx)
     lon_width = distance(sy, sx-dimx/2, sy, sx+dimx/2)
-    box_y = int(radius/lat_width)+1
-    box_x = int(radius/lon_width)+1
+    box_y = int(radius/lat_width+1)
+    box_x = int(radius/lon_width+1)
     points = []
 
     b = np.linspace(sy-dimy*box_y, 

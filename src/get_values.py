@@ -3,7 +3,7 @@ import math
 import gdal
 import numpy as np
 from read_data import variable_names, metadata, read_header, get_dataset, extract_attributes
-from coords import xy_coords, distance, points_within_distance
+from coords import xy_coords, points_within_distance
 from config import DATA_PATHS, find_data
 
 

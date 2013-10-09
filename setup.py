@@ -1,8 +1,7 @@
 from Cython.Build import cythonize
 try:
     # compile all .pyx files to .c files
-    from Cython.Distutils import build_ext
-    cythonize('src/*.pyx')
+    cythonize('src/*.pyx', annotate=True)
 except ImportError:
     pass
 from setuptools import setup, Extension
@@ -35,7 +34,8 @@ def do_setup():
             'pybioclim = pybioclim.__main__:main',
         ],
       },
-      ext_modules=[Extension('pybioclim.coords', ['src/coords.c'])],
+      ext_modules=[Extension('pybioclim.coords', ['src/coords.c'],
+                             extra_compile_args = ['-O3', '-ffast-math'],)],
       )
 
 
