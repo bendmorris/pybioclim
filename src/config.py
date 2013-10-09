@@ -1,7 +1,5 @@
 import os
 
-__version__ = '0.1.0'
-
 # get the path to the package data directory
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 def get_data_dir():

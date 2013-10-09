@@ -9,9 +9,12 @@ import doctest
 import os
 import fnmatch
 import importlib
-
-
-__version__ = None
+import time
+from git import Repo
+head = Repo(os.path.dirname(__file__)).commits()[0]
+__version__ = (time.strftime('%Y%m%d%H%M%S', head.committed_date) + '-' +
+               head.id_abbrev)
+print __version__
 
 def do_setup():
     setup(name='pybioclim',
@@ -45,8 +48,6 @@ args = sys.argv
 sys.argv = [sys.argv[0], 'build_ext', '--inplace']
 do_setup()
 
-from src.config import __version__
-
 
 def locate(pattern, root=os.curdir):
     '''Locate all files matching supplied filename pattern in and below
@@ -60,10 +61,12 @@ failures = 0
 scripts = [x for x in locate('*.py', root='src')] + [x for x in locate('*.so', root='src')]
 for script in scripts:
     script = (os.path.relpath(script)[:-len('.py')]).replace('/', '.')
-    print '**', script, '**'
+    print '** testing', script, '**'
     mod = importlib.import_module(script)
     result = doctest.testmod(mod)
     failures += result.failed
+
+doctest.testfile('README.md')
 
 if failures > 0: raise Exception('%s tests failed.' % failures)
 
