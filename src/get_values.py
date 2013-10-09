@@ -38,7 +38,7 @@ def get_values(file, points):
 
     result = []
     for (lat, lon) in points:
-        x,y = xy_coords((lat, lon), ul, dims)
+        x,y = xy_coords(lat, lon, *(ul+dims))
         value = get_point(data, x, y, no_value)
         if value == no_value: value = None
         result.append(value)
@@ -65,7 +65,7 @@ def get_average(file, points, radius=40):
     result = []
     for point in points:
         within = points_within_distance(*(point + ul + dims), radius=radius)
-        raster_positions = [xy_coords((lat, lon), ul, dims) for (lat, lon) in within]
+        raster_positions = [xy_coords(lat, lon, *(ul + dims)) for (lat, lon) in within]
         values = [get_point(data, pos[0], pos[1], no_value) 
                   for pos in raster_positions]
         values = [v for v in values if not v is None]
@@ -103,7 +103,7 @@ def get_spatial_variance(file, points, radius=40):
             continue
 
         within = points_within_distance(*(point + ul + dims), radius=radius)
-        raster_positions = [xy_coords((lat, lon), ul, dims) for (lat, lon) in within]
+        raster_positions = [xy_coords(lat, lon, *(ul + dims)) for (lat, lon) in within]
         values = [get_point(data, pos[0], pos[1], no_value) 
                   for pos in raster_positions]
         values = [v for v in values if not v is None]

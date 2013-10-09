@@ -10,29 +10,29 @@ cdef extern from "math.h":
 
 cdef double pi = 3.141592654
 
-cpdef xy_coords(point, ul, dims):
+cpdef xy_coords(py, px, uly, ulx, dimy, dimx):
     '''Given a latitude/longitude pair and resolution information about the 
     raster file, gives the row/column of the corresponding raster matrix.
 
-    >>> xy_coords((90, -180), (90, -180), (10, 10))
+    >>> xy_coords(90, -180, 90, -180, 10, 10)
     (0, 0)
-    >>> xy_coords((0, 10), (90, -180), (10, 10))
+    >>> xy_coords(0, 10, 90, -180, 10, 10)
     (9, 19)
-    >>> xy_coords((89, -179), (90, -180), (1, 1))
+    >>> xy_coords(89, -179, 90, -180, 1, 1)
     (1, 1)
-    >>> xy_coords((-10, 0), (0, 0), (10, 10))
+    >>> xy_coords(-10, 0, 0, 0, 10, 10)
     (1, 0)
-    >>> xy_coords((-2, 0), (0, 0), (0.5, 2.5))
+    >>> xy_coords(-2, 0, 0, 0, 0.5, 2.5)
     (4, 0)
-    >>> xy_coords((-5, 0), (0, 0), (1, 1))
+    >>> xy_coords(-5, 0, 0, 0, 1, 1)
     (5, 0)
     '''
     
     # positive y-direction in raster vs on globe are reversed
     # (positive is North, but down in raster)
-    cdef int dy, dx    
-    dy = int((ul[0]-point[0])/dims[0])
-    dx = int((point[1]-ul[1])/dims[1])
+    cdef int dy, dx
+    dy = int((uly-py)/dimy)
+    dx = int((px-ulx)/dimx)
 
     return dy, dx
 
