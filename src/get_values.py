@@ -7,6 +7,11 @@ from coords import xy_coords, distance, points_within_distance
 from config import DATA_PATHS, find_data
 
 
+def get_point(data, x, y, no_value=None):
+    value = float(data.ReadAsArray(y, x, 1, 1)[0])
+    return None if value == no_value else value
+
+
 def get_values(file, points):
     '''Given a .bil file (or other file readable by GDAL) and a set of (lat,lon) 
     points, return a list of values for those points. -9999 will be converted to 
@@ -17,10 +22,14 @@ def get_values(file, points):
     [257.0, 249.0, None]
     '''
 
-    data, raster, no_value, ul, dims, size = extract_attributes(file)
+    data, no_value, ul, dims, size = extract_attributes(file)
 
-    result = [float(raster[xy_coords((lat, lon), ul, dims, size)]) for (lat, lon) in points]
-    result = [None if value == no_value else value for value in result]
+    result = []
+    for (lat, lon) in points:
+        x,y = xy_coords((lat, lon), ul, dims, size)
+        value = get_point(data, x, y, no_value)
+        if value == no_value: value = None
+        result.append(value)
 
     return result
 
@@ -39,13 +48,15 @@ def get_average(file, points, radius=40):
     True
     '''
 
-    data, raster, no_value, ul, dims, size = extract_attributes(file)
+    data, no_value, ul, dims, size = extract_attributes(file)
     
     result = []
     for point in points:
         within = points_within_distance(point, radius, ul, dims)
         raster_positions = [xy_coords((lat, lon), ul, dims, size) for (lat, lon) in within]
-        values = [raster[pos] for pos in raster_positions if raster[pos] != no_value]
+        values = [get_point(data, pos[0], pos[1], no_value) 
+                  for pos in raster_positions]
+        values = [v for v in values if not v is None]
         if len(values) == 0: result.append(None)
         else:
             result.append(sum(values)/float(len(values)))
@@ -69,7 +80,7 @@ def get_spatial_variance(file, points, radius=40):
     True
     '''
 
-    data, raster, no_value, ul, dims, size = extract_attributes(file)
+    data, no_value, ul, dims, size = extract_attributes(file)
     
     result = []
     for point in points:
@@ -81,7 +92,9 @@ def get_spatial_variance(file, points, radius=40):
 
         within = points_within_distance(point, radius, ul, dims)
         raster_positions = [xy_coords((lat, lon), ul, dims, size) for (lat, lon) in within]
-        values = [raster[pos] for pos in raster_positions if raster[pos] != no_value]
+        values = [get_point(data, pos[0], pos[1], no_value) 
+                  for pos in raster_positions]
+        values = [v for v in values if not v is None]
         if len(values) == 0: result.append(None)
         else:
             result.append(float(np.var(values)))

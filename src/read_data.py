@@ -72,7 +72,6 @@ def extract_attributes(file):
     '''Get information about a .bil file.'''
     file = filename(file)
     data = get_dataset(file)
-    raster = data.ReadAsArray()
     try:
         no_value = metadata[file]['nodata']
     except KeyError:
@@ -86,7 +85,7 @@ def extract_attributes(file):
     
     size = data.RasterYSize, data.RasterXSize
 
-    return data, raster, no_value, ul, dims, size
+    return data, no_value, ul, dims, size
 
 
 for data_dir in DATA_PATHS:
