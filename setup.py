@@ -63,7 +63,7 @@ for script in scripts:
     script = (os.path.relpath(script)[:-len('.py')]).replace('/', '.')
     print '**', script, '**'
     mod = importlib.import_module(script)
-    result = doctest.testmod(mod, verbose=True)
+    result = doctest.testmod(mod)
     failures += result.failed
 
 if failures > 0: raise Exception('%s tests failed.' % failures)

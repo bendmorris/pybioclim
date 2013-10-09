@@ -1,44 +1,41 @@
+''' 
+>>> variable_names['bio1']
+'annual mean temperature'
+'''
 import os
-import cPickle as pkl
-from config import DATA_DIR
+from config import DATA_PATHS, find_data
 
 
-pkl_path = os.path.join(DATA_DIR, 'headers.pkl')
+variable_names = {}
+metadata = {}
 
-def dump_headers():
-    ''' 
-    >>> variable_names['bio1']
-    'annual mean temperature'
-    '''
-    headers = [filename for filename in os.listdir(DATA_DIR)
+def read_header(name):
+    header_path = find_data(name + '.hdr')
+    with open(header_path) as header_file:
+        for line in header_file:
+            line = line.strip().lower()
+            if not line: continue
+            
+            key, value = line.split()[0], ' '.join(line.split()[1:])
+            if key == 'variable':
+                if ' = ' in value:
+                    value = value.split(' = ')[1]
+                variable_names[name] = value
+            if key == 'nodata':
+                try:
+                    value = float(value)
+                except ValueError: pass
+            if not name in metadata:
+                metadata[name] = {}
+            
+            metadata[name][key] = value
+
+for data_dir in DATA_PATHS:
+    headers = [filename for filename in os.listdir(data_dir)
                         if filename.endswith('.hdr')]
-    
-    variable_names = {}
-    metadata = {}
+
     for header in headers:
         name = header[:-len('.hdr')]
-        with open(os.path.join(DATA_DIR, header)) as header_file:
-            for line in header_file:
-                line = line.strip().lower()
-                if not line: continue
+        if not name in metadata:
+            read_header(name)
 
-                key, value = line.split()[0], ' '.join(line.split()[1:])
-                if key == 'variable':
-                    value = value.split(' = ')[1]
-                    variable_names[name] = value
-                if key == 'nodata':
-                    try:
-                        value = float(value)
-                    except ValueError: pass
-                if not name in metadata:
-                    metadata[name] = {}
-                metadata[name][key] = value
-
-
-    with open(pkl_path, 'w') as dump_file:
-        pkl.dump((variable_names, metadata), dump_file, -1)
-
-
-if not os.path.exists(pkl_path): dump_headers()
-with open(pkl_path) as pkl_file:
-    variable_names, metadata = pkl.load(pkl_file)

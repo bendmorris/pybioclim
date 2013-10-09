@@ -32,6 +32,7 @@ cpdef xy_coords(point, ul, dims, sizes=None):
     # positive y-direction in raster vs on globe are reversed
     # (positive is North, but down in raster)
     cdef int dy, dx
+    
     dy = int(round((ul[0]-point[0])/dims[0]))
     dx = int(round((point[1]-ul[1])/dims[1]))
     if not sizes is None:
@@ -40,7 +41,7 @@ cpdef xy_coords(point, ul, dims, sizes=None):
 
     return dy, dx
 
-cpdef double radians(deg):
+cpdef double radians(double deg):
     '''Converts degrees to radians.
 
     >>> abs(radians(0)) < 0.00001
@@ -77,7 +78,7 @@ cpdef double distance(p1, p2):
     c = 2 * atan2(a**0.5, (1-a)**0.5)
     return 6371 * c
 
-cpdef points_within_distance(start_point, radius, ul, dims):
+cpdef points_within_distance(start_point, double radius, ul, dims):
     '''Find the set of lat/lon coords in a raster that are within `radius` km of 
     the starting point.
     
