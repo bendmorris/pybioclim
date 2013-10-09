@@ -1,6 +1,14 @@
 This is a simple Python package for interacting with BIOCLIM climate data in 
 Python. The data files are included in the repository.
 
+Requirements:
+
+* numpy
+* gdal
+* gitpython
+* cython
+* matplotlib/Basemap (optional, for drawing maps)
+
 To install:
 
     python setup.py install
