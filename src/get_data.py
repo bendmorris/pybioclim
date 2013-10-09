@@ -3,7 +3,7 @@ import math
 import gdal
 import numpy as np
 from read_headers import variable_names, metadata
-from coords_to_raster_xy import xy_coords, distance, points_within_distance
+from coords import xy_coords, distance, points_within_distance
 from config import DATA_DIR, ul, lr
 
 
@@ -106,6 +106,12 @@ def get_spatial_variance(file, points, radius=40):
     
     result = []
     for point in points:
+        # because the distance between longitude points approaches 0 at the 
+        # poles, only compute variance between 60 N and 60 S
+        if abs(point[0]) > 60:
+            result.append(None)
+            continue
+
         within = points_within_distance(point, radius, ul, dims)
         raster_positions = [xy_coords((lat, lon), ul, dims, size) for (lat, lon) in within]
         values = [raster[pos] for pos in raster_positions if raster[pos] != no_value]

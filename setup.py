@@ -1,32 +1,21 @@
-from setuptools import setup
-from src.config import __version__
+from Cython.Build import cythonize
+try:
+    # compile all .pyx files to .c files
+    from Cython.Distutils import build_ext
+    cythonize('src/*.pyx')
+except ImportError:
+    pass
+from setuptools import setup, Extension
 import doctest
 import os
 import fnmatch
 import importlib
-import src.read_headers
 
 
-def locate(pattern, root=os.curdir):
-    '''Locate all files matching supplied filename pattern in and below
-    supplied root directory.'''
-    for path, dirs, files in os.walk(os.path.abspath(root)):
-        for filename in fnmatch.filter(files, pattern):
-            yield os.path.join(path, filename)
+__version__ = None
 
-# run doctest unit tests in all source Python scripts
-failures = 0
-scripts = locate('*.py', root='src')
-for script in scripts:
-    script = (os.path.relpath(script)[:-len('.py')]).replace('/', '.')
-    print '**', script, '**'
-    mod = importlib.import_module(script)
-    result = doctest.testmod(mod, verbose=True)
-    failures += result.failed
-
-if failures > 0: raise Exception('%s tests failed.' % failures)
-
-setup(name='pybioclim',
+def do_setup():
+    setup(name='pybioclim',
       version=__version__,
       description='Python library for working with BIOCLIM climate data',
       author='Ben Morris',
@@ -46,4 +35,38 @@ setup(name='pybioclim',
             'pybioclim = pybioclim.__main__:main',
         ],
       },
+      ext_modules=[Extension('pybioclim.coords', ['src/coords.c'])],
       )
+
+
+# before installing, build modules in-place so that tests can be run
+import sys
+args = sys.argv
+sys.argv = [sys.argv[0], 'build_ext', '--inplace']
+do_setup()
+
+from src.config import __version__
+import src.read_headers
+
+
+def locate(pattern, root=os.curdir):
+    '''Locate all files matching supplied filename pattern in and below
+    supplied root directory.'''
+    for path, dirs, files in os.walk(os.path.abspath(root)):
+        for filename in fnmatch.filter(files, pattern):
+            yield os.path.join(path, filename)
+
+# run doctest unit tests in all source Python scripts
+failures = 0
+scripts = [x for x in locate('*.py', root='src')] + [x for x in locate('*.so', root='src')]
+for script in scripts:
+    script = (os.path.relpath(script)[:-len('.py')]).replace('/', '.')
+    print '**', script, '**'
+    mod = importlib.import_module(script)
+    result = doctest.testmod(mod, verbose=True)
+    failures += result.failed
+
+if failures > 0: raise Exception('%s tests failed.' % failures)
+
+sys.argv = args
+do_setup()
