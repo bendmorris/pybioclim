@@ -9,9 +9,12 @@ import doctest
 import os
 import fnmatch
 import importlib
-
-
-__version__ = None
+import time
+from git import Repo
+head = Repo(os.path.dirname(__file__)).commits()[0]
+__version__ = (time.strftime('%Y%m%d%H%M%S', head.committed_date) + '-' +
+               head.id_abbrev)
+print __version__
 
 def do_setup():
     setup(name='pybioclim',
@@ -44,8 +47,6 @@ import sys
 args = sys.argv
 sys.argv = [sys.argv[0], 'build_ext', '--inplace']
 do_setup()
-
-from src.config import __version__
 
 
 def locate(pattern, root=os.curdir):
