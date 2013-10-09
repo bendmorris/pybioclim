@@ -83,30 +83,25 @@ cpdef points_within_distance(start_point, double radius, ul, dims):
     the starting point.
     
     >>> points_within_distance((0,0), 0, (90, -180), (0.5, 0.5))
-    [(0, 0)]
+    [(0.0, 0.0)]
     >>> points_within_distance((0,0), 100, (90, -180), (0.5, 0.5))
-    [(-0.5, -0.5), (-0.5, 0.0), (-0.5, 0.5), (0.0, -0.5), (0, 0), (0.0, 0.5), (0.5, -0.5), (0.5, 0.0), (0.5, 0.5)]
+    [(-0.5, -0.5), (-0.5, 0.0), (-0.5, 0.5), (0.0, -0.5), (0.0, 0.0), (0.0, 0.5), (0.5, -0.5), (0.5, 0.0), (0.5, 0.5)]
     '''
     
-    cdef int last_point_size, box_size
-    box_size = int(radius/(110.*min(dims)))
-    points = set([start_point])
-    seen = set([start_point])
-    last_point_size = 1
-    while True:
-        b, a = [np.linspace(start_point[i]-dims[i]*box_size, 
-                            start_point[i]+dims[i]*box_size, 
-                            1+box_size*2)
-                for i in (0,1)]
-        for bi in b:
-            for ai in a:
-                if not ((bi, ai)) in seen:
-                    dist = distance((bi,ai),start_point)
-                    if dist <= radius: points.add((bi,ai))
-                    seen.add((bi, ai))
-                
-        if not len(points) > last_point_size: break
-        last_point_size = len(points)
-        box_size += 1
+    cdef double sx, sy, lat_width, lon_width
+    sy, sx = start_point
+    lat_width = distance((sy-dims[0]/2, sx), (sy+dims[0]/2, sx))
+    lon_width = distance((sy, sx-dims[1]/2), (sy, sx+dims[1]/2))
+    box_size = (int(radius/lat_width)+1, int(radius/lon_width)+1)
+    points = []
 
-    return sorted(list(points))
+    b, a = [np.linspace(start_point[i]-dims[i]*box_size[i], 
+                        start_point[i]+dims[i]*box_size[i], 
+                        1+box_size[i]*2)
+            for i in (0,1)]
+    for bi in b:
+        for ai in a:
+            dist = distance((bi,ai),start_point)
+            if dist <= radius: points.append((bi,ai))
+                
+    return points
