@@ -13,7 +13,8 @@ def draw_map(file, map=None, show=True, title=None, log=False, map_type=None):
     keyword argument "map." If none is provided, the default Miller 
     projection will be used.'''
     
-    data, raster, no_value, ul, dims, size = extract_attributes(file)
+    data, no_value, ul, dims, size = extract_attributes(file)
+    raster = data.ReadAsArray()
     data = get_dataset(file)
     lats = np.linspace(ul[0], ul[0]-dims[0]*size[0], size[0], endpoint=False)
     lons = np.linspace(ul[1], ul[1]+dims[1]*size[1], size[1], endpoint=False)
@@ -49,7 +50,11 @@ def draw_map(file, map=None, show=True, title=None, log=False, map_type=None):
         map.drawcoastlines(linewidth=1)
         map.drawcountries(linewidth=1)
         map.drawstates(linewidth=0.5)
-    
+        parallels = np.arange(-90.,90,10.)
+        map.drawparallels(parallels,labels=[False,True,True,False])
+        meridians = np.arange(-180.,180.,20.)
+        map.drawmeridians(meridians,labels=[True,False,False,True])    
+
     x, y = np.meshgrid(lons, lats)
             
     map.pcolormesh(x, y, data=values, latlon=True, cmap=plt.cm.Spectral_r)

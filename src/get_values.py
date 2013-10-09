@@ -7,8 +7,10 @@ from coords import xy_coords, distance, points_within_distance
 from config import DATA_PATHS, find_data
 
 
-def get_point(data, x, y, no_value=None):
-    value = float(data.ReadAsArray(y, x, 1, 1)[0])
+def get_point(data, y, x, no_value=None):
+    y %= data.RasterYSize
+    x %= data.RasterXSize
+    value = float(data.ReadAsArray(x, y, 1, 1)[0])
     return None if value == no_value else value
 
 
@@ -17,16 +19,26 @@ def get_values(file, points):
     points, return a list of values for those points. -9999 will be converted to 
     None.
     
-    >>> lat_lons = [(10,10), (20,20), (0,0)]
-    >>> get_values('bio1', lat_lons)
-    [257.0, 249.0, None]
+    >>> lat_lons = [(15,15), (20,20), (-60,0)]
+    
+    # Two points on land, one in the water:
+    >>> [type(x) for x in get_values('bio1', lat_lons)]
+    [<type 'float'>, <type 'float'>, <type 'NoneType'>]
+
+    # Sahara hotter than Siberia (max temp. of hottest quarter):
+    >>> get_values('bio10', [(0, 20)])[0] > get_values('bio10', [(140, 65)])[0]
+    True
+
+    # Albuquerque hotter than Anchorage (mean annual temperature):
+    >>> get_values('bio1', [(35, -107)])[0] > get_values('bio1', [(61, -150)])[0]
+    True
     '''
 
     data, no_value, ul, dims, size = extract_attributes(file)
 
     result = []
     for (lat, lon) in points:
-        x,y = xy_coords((lat, lon), ul, dims, size)
+        x,y = xy_coords((lat, lon), ul, dims)
         value = get_point(data, x, y, no_value)
         if value == no_value: value = None
         result.append(value)
@@ -42,8 +54,8 @@ def get_average(file, points, radius=40):
     circle.
     
     >>> lat_lons = [(10,10), (20,20), (0,0)]
-    >>> get_average('bio1', lat_lons, 0)
-    [257.0, 249.0, None]
+    >>> [type(x) for x in get_average('bio1', lat_lons, 0)]
+    [<type 'float'>, <type 'float'>, <type 'NoneType'>]
     >>> get_average('bio1', lat_lons, 100) != get_average('bio1', lat_lons, 50) != get_average('bio1', lat_lons, 0)
     True
     '''
@@ -53,7 +65,7 @@ def get_average(file, points, radius=40):
     result = []
     for point in points:
         within = points_within_distance(point, radius, ul, dims)
-        raster_positions = [xy_coords((lat, lon), ul, dims, size) for (lat, lon) in within]
+        raster_positions = [xy_coords((lat, lon), ul, dims) for (lat, lon) in within]
         values = [get_point(data, pos[0], pos[1], no_value) 
                   for pos in raster_positions]
         values = [v for v in values if not v is None]
@@ -91,7 +103,7 @@ def get_spatial_variance(file, points, radius=40):
             continue
 
         within = points_within_distance(point, radius, ul, dims)
-        raster_positions = [xy_coords((lat, lon), ul, dims, size) for (lat, lon) in within]
+        raster_positions = [xy_coords((lat, lon), ul, dims) for (lat, lon) in within]
         values = [get_point(data, pos[0], pos[1], no_value) 
                   for pos in raster_positions]
         values = [v for v in values if not v is None]

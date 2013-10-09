@@ -69,7 +69,9 @@ def get_dataset(file):
 
 
 def extract_attributes(file):
-    '''Get information about a .bil file.'''
+    '''Get information about a .bil file:
+
+    (data, no_value, ul, dims, size)'''
     file = filename(file)
     data = get_dataset(file)
     try:
