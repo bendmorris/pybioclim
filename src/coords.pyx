@@ -31,8 +31,8 @@ cpdef xy_coords(point, ul, dims):
     # positive y-direction in raster vs on globe are reversed
     # (positive is North, but down in raster)
     cdef int dy, dx    
-    dy = int(round((ul[0]-point[0])/dims[0]))
-    dx = int(round((point[1]-ul[1])/dims[1]))
+    dy = int((ul[0]-point[0])/dims[0])
+    dx = int((point[1]-ul[1])/dims[1])
 
     return dy, dx
 
@@ -52,51 +52,51 @@ cpdef double radians(double deg):
     '''
     return deg/180.*(pi)
 
-cpdef double distance(p1, p2):
+cpdef double distance(double y1, double x1, double y2, double x2):
     '''Approximate distance between two lat/lon points, in km.
     
     p1 and p2 should be tuples containing (lat,lon)
     
-    >>> 1250 <= distance((50, -50), (40, -40)) <= 1500
+    >>> 1250 <= distance(50,-50, 40,-40) <= 1500
     True
-    >>> 1000 <= distance((50, -50), (40, -50)) <= 1250
+    >>> 1000 <= distance(50,-50, 40,-50) <= 1250
     True
-    >>> 110 <= distance((0,0),(1,0)) <= 112
+    >>> 110 <= distance(0,0, 1,0) <= 112
     True
     '''
-    cdef float y1, y2, x1, x2, dy, dx, a, c
-    y1, x1 = p1
-    y2, x2 = p2
     dy = radians(abs(y2-y1))
     dx = radians(abs(x2-x1))
     a = sin(dy/2)**2 + sin(dx/2)**2 * cos(radians(y1)) * cos(radians(y2))
     c = 2 * atan2(a**0.5, (1-a)**0.5)
     return 6371 * c
 
-cpdef points_within_distance(start_point, double radius, ul, dims):
+cpdef points_within_distance(sy, sx, uly, ulx, dimy, dimx, double radius=40):
     '''Find the set of lat/lon coords in a raster that are within `radius` km of 
     the starting point.
     
-    >>> points_within_distance((0,0), 0, (90, -180), (0.5, 0.5))
+    >>> points_within_distance(0,0, 90,-180, 0.5,0.5, 0)
     [(0.0, 0.0)]
-    >>> points_within_distance((0,0), 100, (90, -180), (0.5, 0.5))
+    >>> points_within_distance(0,0, 90,-180, 0.5,0.5, 100)
     [(-0.5, -0.5), (-0.5, 0.0), (-0.5, 0.5), (0.0, -0.5), (0.0, 0.0), (0.0, 0.5), (0.5, -0.5), (0.5, 0.0), (0.5, 0.5)]
     '''
     
-    cdef double sx, sy, lat_width, lon_width
-    sy, sx = start_point
-    lat_width = distance((sy-dims[0]/2, sx), (sy+dims[0]/2, sx))
-    lon_width = distance((sy, sx-dims[1]/2), (sy, sx+dims[1]/2))
-    box_size = (int(radius/lat_width)+1, int(radius/lon_width)+1)
+    cdef double lat_width, lon_width, dist, bi, ai
+    cdef int box_y, box_x
+    lat_width = distance(sy-dimy/2, sx, sy+dimy/2, sx)
+    lon_width = distance(sy, sx-dimx/2, sy, sx+dimx/2)
+    box_y = int(radius/lat_width)+1
+    box_x = int(radius/lon_width)+1
     points = []
 
-    b, a = [np.linspace(start_point[i]-dims[i]*box_size[i], 
-                        start_point[i]+dims[i]*box_size[i], 
-                        1+box_size[i]*2)
-            for i in (0,1)]
+    b = np.linspace(sy-dimy*box_y, 
+                    sy+dimy*box_y, 
+                    1+box_y*2)
+    a = np.linspace(sx-dimx*box_x, 
+                    sx+dimx*box_x, 
+                    1+box_x*2)
     for bi in b:
         for ai in a:
-            dist = distance((bi,ai),start_point)
+            dist = distance(sy,sx,bi,ai)
             if dist <= radius: points.append((bi,ai))
                 
     return points

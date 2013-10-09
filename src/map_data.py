@@ -14,13 +14,12 @@ def draw_map(file, map=None, show=True, title=None, log=False, map_type=None):
     projection will be used.'''
     
     data, no_value, ul, dims, size = extract_attributes(file)
-    raster = data.ReadAsArray()
     data = get_dataset(file)
     lats = np.linspace(ul[0], ul[0]-dims[0]*size[0], size[0], endpoint=False)
     lons = np.linspace(ul[1], ul[1]+dims[1]*size[1], size[1], endpoint=False)
     if map_type == 'variance':
         x, y = np.meshgrid(lons, lats)
-        data = np.zeros(x.shape)
+        raster = np.zeros(x.shape)
         values = get_spatial_variance(file, 
                                       [(lat, lon) 
                                        for lat in lats 
@@ -28,6 +27,9 @@ def draw_map(file, map=None, show=True, title=None, log=False, map_type=None):
         for a in range(data.shape[0]):
             for b in range(data.shape[1]):
                 data[a,b] = values.pop()
+    else:
+        raster = data.ReadAsArray()
+
     
     # because missing data is entered as -9999, created a masked array so that 
     # these points will not be plotted
